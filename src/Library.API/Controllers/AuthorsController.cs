@@ -36,6 +36,5 @@
 			AuthorDto author = Mapper.Map<AuthorDto>(authorFromRepo);
 			return Ok(author);
 		}
-
 	}
 }

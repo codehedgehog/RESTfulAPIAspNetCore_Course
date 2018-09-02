@@ -12,6 +12,8 @@
 
   <ItemGroup>
     <Compile Remove="Controllers\ValuesController.cs" />
+    <Compile Remove="Models\AuthorForCreationDto.cs" />
+    <Compile Remove="Models\BookForCreationDto.cs" />
   </ItemGroup>
 
   <ItemGroup>
