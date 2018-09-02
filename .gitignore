@@ -11,7 +11,7 @@
 *.suo
 *.user
 *.userosscache
-
+Backup\
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
