@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-
-namespace Library.API
+﻿namespace Library.API
 {
+	using Library.API.Services;
+	using Microsoft.AspNetCore.Builder;
+	using Microsoft.AspNetCore.Hosting;
+	using Microsoft.AspNetCore.Mvc;
+	using Microsoft.Extensions.Configuration;
+	using Microsoft.Extensions.DependencyInjection;
+
 	public class Startup
 	{
 		public Startup(IConfiguration configuration)
@@ -26,6 +20,10 @@ namespace Library.API
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+			//var connectionString = Configuration["connectionStrings:libraryDBConnectionString"];
+			//services.AddDbContext<LibraryContext>(o => o.UseSqlServer(connectionString));
+			// register the repository
+			services.AddScoped<ILibraryRepository, LibraryRepository>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -37,10 +35,12 @@ namespace Library.API
 			}
 			else
 			{
+				app.UseExceptionHandler();
 				app.UseHsts();
 			}
 
 			app.UseHttpsRedirection();
+			//libraryContext.EnsureSeedDataForContext();
 			app.UseMvc();
 		}
 	}
