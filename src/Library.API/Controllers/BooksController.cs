@@ -37,5 +37,34 @@
 			BookDto bookForAuthor = Mapper.Map<BookDto>(bookForAuthorFromRepo);
 			return Ok(bookForAuthor);
 		}
+
+		[HttpPost()]
+		public async Task<IActionResult> CreateBookForAuthor(Guid authorId, [FromBody] BookForCreationDto book)
+		{
+			if (book == null) return BadRequest();
+			if (!_libraryRepository.AuthorExists(authorId)) return NotFound();
+			Book bookEntity = Mapper.Map<Book>(book);
+			_libraryRepository.AddBookForAuthor(authorId, bookEntity);
+			if (!(await _libraryRepository.SaveAsync()))
+			{
+				throw new Exception($"Creating a book for author {authorId} failed on save.");
+			}
+			BookDto bookToReturn = Mapper.Map<BookDto>(bookEntity);
+			return CreatedAtRoute(routeName: "GetBookForAuthor", routeValues: new { authorId, id = bookToReturn.Id }, value: bookToReturn);
+		}
+
+		[HttpDelete("{id}")]
+		public async Task<IActionResult> DeleteBookForAuthor(Guid authorId, Guid id)
+		{
+			if (!_libraryRepository.AuthorExists(authorId)) return NotFound();
+			Book bookForAuthorFromRepo = _libraryRepository.GetBookForAuthor(authorId, id);
+			if (bookForAuthorFromRepo == null) return NotFound();
+			_libraryRepository.DeleteBook(bookForAuthorFromRepo);
+			if (!(await _libraryRepository.SaveAsync()))
+			{
+				throw new Exception($"Deleting book {id} for author {authorId} failed on save.");
+			}
+			return NoContent();
+		}
 	}
 }

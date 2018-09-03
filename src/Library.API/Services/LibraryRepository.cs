@@ -4,6 +4,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Threading.Tasks;
 
 	public class LibraryRepository : ILibraryRepository
 	{
@@ -102,6 +103,11 @@
 		public bool Save()
 		{
 			return (_context.SaveChanges() >= 0);
+		}
+
+		public async Task<bool> SaveAsync()
+		{
+			return (await _context.SaveChangesAsync() >= 0);
 		}
 	}
 }
