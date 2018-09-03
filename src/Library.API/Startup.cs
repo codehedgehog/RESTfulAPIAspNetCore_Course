@@ -24,14 +24,14 @@
 
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddMvc(setupAction: setupAction =>
+			services.AddMvc(setupAction: options =>
 			{
-				setupAction.ReturnHttpNotAcceptable = true;
-				setupAction.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
+				options.ReturnHttpNotAcceptable = true;
+				options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
+				options.InputFormatters.Add(new XmlDataContractSerializerInputFormatter(options));
 			})
-				.SetCompatibilityVersion(version: CompatibilityVersion.Version_2_1);
+			.SetCompatibilityVersion(version: CompatibilityVersion.Version_2_1);
 			services.AddDbContext<LibraryContext>(o => o.UseSqlServer(Configuration.GetConnectionString("libraryDbContext")), contextLifetime: ServiceLifetime.Scoped, optionsLifetime: ServiceLifetime.Scoped);
-			// register the repository
 			services.AddScoped<ILibraryRepository, LibraryRepository>();
 		}
 
@@ -62,6 +62,8 @@
 						.ForMember(dest => dest.Name, opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"))
 						.ForMember(dest => dest.Age, opt => opt.MapFrom(src => src.DateOfBirth.GetCurrentAge()));
 				cfg.CreateMap<Book, Models.BookDto>();
+				cfg.CreateMap<Models.AuthorForCreationDto, Entities.Author>();
+				cfg.CreateMap<Models.BookForCreationDto, Entities.Book>();
 			});
 			libraryContext.EnsureSeedDataForContext();
 			app.UseMvc();

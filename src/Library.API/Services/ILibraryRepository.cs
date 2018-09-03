@@ -3,6 +3,7 @@
 	using Library.API.Entities;
 	using System;
 	using System.Collections.Generic;
+	using System.Threading.Tasks;
 
 	public interface ILibraryRepository
 	{
@@ -31,5 +32,7 @@
 		void DeleteBook(Book book);
 
 		bool Save();
+
+		Task<bool> SaveAsync();
 	}
 }
