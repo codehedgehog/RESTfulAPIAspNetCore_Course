@@ -1,7 +1,7 @@
-﻿
-namespace Library.API.Models
+﻿namespace Library.API.Models
 {
 	using System.ComponentModel.DataAnnotations;
+
 	public class BookForUpdateDto : BookForManipulationDto
 	{
 		[Required(ErrorMessage = "You should fill out a description.")]

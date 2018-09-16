@@ -1,5 +1,4 @@
-﻿
-namespace Library.API.Models
+﻿namespace Library.API.Models
 {
 	using System.ComponentModel.DataAnnotations;
 
@@ -12,5 +11,4 @@ namespace Library.API.Models
 		[MaxLength(500, ErrorMessage = "The description shouldn't have more than 500 characters.")]
 		public virtual string Description { get; set; }
 	}
-
 }
