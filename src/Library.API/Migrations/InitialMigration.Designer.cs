@@ -1,74 +1,76 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
-using Library.API.Entities;
+﻿
 
 namespace Library.API.Migrations
 {
-    [DbContext(typeof(LibraryContext))]
-    [Migration("20161007150914_InitialMigration")]
-    partial class InitialMigration
-    {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
-        {
-            modelBuilder
-                .HasAnnotation("ProductVersion", "1.0.1")
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+	using Library.API.DbContexts;
+	using Microsoft.EntityFrameworkCore;
+	using Microsoft.EntityFrameworkCore.Infrastructure;
+	using Microsoft.EntityFrameworkCore.Metadata;
+	using Microsoft.EntityFrameworkCore.Migrations;
+	using System;
 
-            modelBuilder.Entity("Library.API.Entities.Author", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
+	[DbContext(typeof(LibraryContext))]
+	[Migration("20161007150914_InitialMigration")]
+	partial class InitialMigration
+	{
+		protected override void BuildTargetModel(ModelBuilder modelBuilder)
+		{
+			modelBuilder
+					.HasAnnotation("ProductVersion", "1.0.1")
+					.HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTimeOffset>("DateOfBirth");
+			modelBuilder.Entity("Library.API.Entities.Author", b =>
+					{
+						b.Property<Guid>("Id")
+											.ValueGeneratedOnAdd();
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasAnnotation("MaxLength", 50);
+						b.Property<DateTimeOffset>("DateOfBirth");
 
-                    b.Property<string>("Genre")
-                        .IsRequired()
-                        .HasAnnotation("MaxLength", 50);
+						b.Property<string>("FirstName")
+											.IsRequired()
+											.HasAnnotation("MaxLength", 50);
 
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasAnnotation("MaxLength", 50);
+						b.Property<string>("Genre")
+											.IsRequired()
+											.HasAnnotation("MaxLength", 50);
 
-                    b.HasKey("Id");
+						b.Property<string>("LastName")
+											.IsRequired()
+											.HasAnnotation("MaxLength", 50);
 
-                    b.ToTable("Authors");
-                });
+						b.HasKey("Id");
 
-            modelBuilder.Entity("Library.API.Entities.Book", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
+						b.ToTable("Authors");
+					});
 
-                    b.Property<Guid>("AuthorId");
+			modelBuilder.Entity("Library.API.Entities.Book", b =>
+					{
+						b.Property<Guid>("Id")
+											.ValueGeneratedOnAdd();
 
-                    b.Property<string>("Description")
-                        .HasAnnotation("MaxLength", 500);
+						b.Property<Guid>("AuthorId");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasAnnotation("MaxLength", 100);
+						b.Property<string>("Description")
+											.HasAnnotation("MaxLength", 500);
 
-                    b.HasKey("Id");
+						b.Property<string>("Title")
+											.IsRequired()
+											.HasAnnotation("MaxLength", 100);
 
-                    b.HasIndex("AuthorId");
+						b.HasKey("Id");
 
-                    b.ToTable("Books");
-                });
+						b.HasIndex("AuthorId");
 
-            modelBuilder.Entity("Library.API.Entities.Book", b =>
-                {
-                    b.HasOne("Library.API.Entities.Author", "Author")
-                        .WithMany("Books")
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-        }
-    }
+						b.ToTable("Books");
+					});
+
+			modelBuilder.Entity("Library.API.Entities.Book", b =>
+					{
+						b.HasOne("Library.API.Entities.Author", "Author")
+											.WithMany("Books")
+											.HasForeignKey("AuthorId")
+											.OnDelete(DeleteBehavior.Cascade);
+					});
+		}
+	}
 }

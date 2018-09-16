@@ -1,6 +1,6 @@
 ﻿namespace Library.API
 {
-	using Library.API.Entities;
+	using Library.API.DbContexts;
 	using Library.API.Helpers;
 	using Library.API.Services;
 	using Microsoft.AspNetCore.Builder;
@@ -58,12 +58,15 @@
 
 			AutoMapper.Mapper.Initialize(cfg =>
 			{
-				cfg.CreateMap<Author, Models.AuthorDto>()
+				cfg.CreateMap<Entities.Author, Models.AuthorDto>()
 						.ForMember(dest => dest.Name, opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"))
 						.ForMember(dest => dest.Age, opt => opt.MapFrom(src => src.DateOfBirth.GetCurrentAge()));
-				cfg.CreateMap<Book, Models.BookDto>();
+				cfg.CreateMap<Entities.Book, Models.BookDto>();
 				cfg.CreateMap<Models.AuthorForCreationDto, Entities.Author>();
+
 				cfg.CreateMap<Models.BookForCreationDto, Entities.Book>();
+				cfg.CreateMap<Models.BookForUpdateDto, Entities.Book>();
+				cfg.CreateMap<Entities.Book, Models.BookForUpdateDto>();
 			});
 			libraryContext.EnsureSeedDataForContext();
 			app.UseMvc();
