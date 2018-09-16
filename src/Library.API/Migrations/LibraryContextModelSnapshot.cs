@@ -1,5 +1,6 @@
 ﻿namespace Library.API.Migrations
 {
+	using Library.API.DbContexts;
 	using Library.API.Entities;
 	using Microsoft.EntityFrameworkCore;
 	using Microsoft.EntityFrameworkCore.Infrastructure;
