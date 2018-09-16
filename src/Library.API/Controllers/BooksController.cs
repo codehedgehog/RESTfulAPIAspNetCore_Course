@@ -6,6 +6,7 @@
 	using Library.API.Services;
 	using Microsoft.AspNetCore.JsonPatch;
 	using Microsoft.AspNetCore.Mvc;
+	using Serilog;
 	using System;
 	using System.Collections.Generic;
 	using System.Threading.Tasks;
@@ -43,6 +44,8 @@
 		public async Task<IActionResult> CreateBookForAuthor(Guid authorId, [FromBody] BookForCreationDto book)
 		{
 			if (book == null) return BadRequest();
+			if (book.Description == book.Title) { ModelState.AddModelError(nameof(BookForCreationDto), "The provided description should be different from the title."); }
+			if (!ModelState.IsValid) { return new UnprocessableEntityObjectResult(ModelState); }
 			if (!_libraryRepository.AuthorExists(authorId)) return NotFound();
 			Book bookEntity = Mapper.Map<Book>(book);
 			_libraryRepository.AddBookForAuthor(authorId, bookEntity);
@@ -65,6 +68,7 @@
 			{
 				throw new Exception($"Deleting book {id} for author {authorId} failed on save.");
 			}
+			Log.Information($"Book {id} for author {authorId} was deleted.");
 			return NoContent();
 		}
 
@@ -72,15 +76,9 @@
 		public IActionResult UpdateBookForAuthor(Guid authorId, Guid id, [FromBody] BookForUpdateDto book)
 		{
 			if (book == null) return BadRequest();
-
-			if (book.Description == book.Title)
-			{
-				ModelState.AddModelError(nameof(BookForUpdateDto), "The provided description should be different from the title.");
-			}
+			if (book.Description == book.Title) ModelState.AddModelError(nameof(BookForUpdateDto), "The provided description should be different from the title.");
 			if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-
 			if (!_libraryRepository.AuthorExists(authorId)) return NotFound();
-
 			Book bookForAuthorFromRepo = _libraryRepository.GetBookForAuthor(authorId, id);
 			if (bookForAuthorFromRepo == null)
 			{
@@ -110,12 +108,9 @@
 			{
 				BookForUpdateDto bookDto = new BookForUpdateDto();
 				patchDoc.ApplyTo(bookDto, ModelState);
-				if (bookDto.Description == bookDto.Title)
-				{
-					ModelState.AddModelError(nameof(BookForUpdateDto), "The provided description should be different from the title.");
-				}
+				if (bookDto.Description == bookDto.Title) ModelState.AddModelError(nameof(BookForUpdateDto), "The provided description should be different from the title.");
 				TryValidateModel(bookDto);
-				if (!ModelState.IsValid) { return new UnprocessableEntityObjectResult(ModelState); }
+				if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
 				Book bookToAdd = Mapper.Map<Book>(bookDto);
 				bookToAdd.Id = id;

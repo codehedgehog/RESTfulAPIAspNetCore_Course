@@ -4,6 +4,7 @@
 	using Library.API.Helpers;
 	using Library.API.Services;
 	using Microsoft.AspNetCore.Builder;
+	using Microsoft.AspNetCore.Diagnostics;
 	using Microsoft.AspNetCore.Hosting;
 	using Microsoft.AspNetCore.Http;
 	using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,7 @@
 	using Microsoft.EntityFrameworkCore;
 	using Microsoft.Extensions.Configuration;
 	using Microsoft.Extensions.DependencyInjection;
-	using Microsoft.Extensions.Logging;
+	using Serilog;
 
 	public class Startup
 	{
@@ -35,7 +36,7 @@
 			services.AddScoped<ILibraryRepository, LibraryRepository>();
 		}
 
-		public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, LibraryContext libraryContext)
+		public void Configure(IApplicationBuilder app, IHostingEnvironment env, LibraryContext libraryContext)
 		{
 			if (env.IsDevelopment())
 			{
@@ -47,7 +48,16 @@
 				{
 					appBuilder.Run(async context =>
 					{
-						context.Response.StatusCode = 500;
+						IExceptionHandlerFeature exceptionHandlerFeature = context.Features.Get<IExceptionHandlerFeature>();
+						if (exceptionHandlerFeature != null)
+						{
+							//var logger = loggerFactory.CreateLogger("Global exception logger");
+							//logger.LogError(eventId: StatusCodes.Status500InternalServerError,
+							//	exception: exceptionHandlerFeature.Error,
+							//	message: exceptionHandlerFeature.Error.Message);
+							Log.Information(exception: exceptionHandlerFeature.Error, messageTemplate: exceptionHandlerFeature.Error.Message);
+						}
+						context.Response.StatusCode = StatusCodes.Status500InternalServerError;
 						await context.Response.WriteAsync("An unexpected fault happened. Try again later.");
 					});
 				});

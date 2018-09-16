@@ -6,6 +6,7 @@
 *.user
 *.css
 *.config
+*.log.txt
 *.sln
 *.sln.docstates
 *.suo
