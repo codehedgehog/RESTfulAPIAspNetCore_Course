@@ -9,6 +9,8 @@
 	using Microsoft.AspNetCore.Http;
 	using Microsoft.AspNetCore.Mvc;
 	using Microsoft.AspNetCore.Mvc.Formatters;
+	using Microsoft.AspNetCore.Mvc.Infrastructure;
+	using Microsoft.AspNetCore.Mvc.Routing;
 	using Microsoft.EntityFrameworkCore;
 	using Microsoft.Extensions.Configuration;
 	using Microsoft.Extensions.DependencyInjection;
@@ -34,6 +36,14 @@
 			.SetCompatibilityVersion(version: CompatibilityVersion.Version_2_1);
 			services.AddDbContext<LibraryContext>(o => o.UseSqlServer(Configuration.GetConnectionString("libraryDbContext")), contextLifetime: ServiceLifetime.Scoped, optionsLifetime: ServiceLifetime.Scoped);
 			services.AddScoped<ILibraryRepository, LibraryRepository>();
+
+			services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+
+			services.AddScoped<IUrlHelper>(implementationFactory =>
+			{
+				ActionContext actionContext = implementationFactory.GetService<IActionContextAccessor>().ActionContext;
+				return new UrlHelper(actionContext);
+			});
 		}
 
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env, LibraryContext libraryContext)

@@ -2,6 +2,7 @@
 {
 	using AutoMapper;
 	using Library.API.Entities;
+	using Library.API.Helpers;
 	using Library.API.Models;
 	using Library.API.Services;
 	using Microsoft.AspNetCore.Http;
@@ -13,18 +14,43 @@
 	[Route("api/authors")]
 	public class AuthorsController : Controller
 	{
-		private ILibraryRepository _libraryRepository;
+		#region Private Fields
 
-		public AuthorsController(ILibraryRepository libraryRepository)
+		private ILibraryRepository _libraryRepository;
+		private IUrlHelper _urlHelper;
+		private const int maxAuthorPageSize = 20;
+
+		#endregion Private Fields
+
+		#region Constructors
+
+		public AuthorsController(ILibraryRepository libraryRepository, IUrlHelper urlHelper)
 		{
 			_libraryRepository = libraryRepository;
+			_urlHelper = urlHelper;
 		}
 
-		[HttpGet]
-		public async Task<IActionResult> GetAuthors()
+		#endregion Constructors
+
+		#region Public Actions
+
+		[HttpGet(Name = "GetAuthors")]
+		public async Task<IActionResult> GetAuthors(AuthorsResourceParameters authorsResourceParameters)
 		{
 			// throw new Exception("Random exception for testing purpose");
-			IEnumerable<Author> authorsFromRepo = await Task.FromResult(_libraryRepository.GetAuthors());
+			PagedList<Author> authorsFromRepo = await Task.FromResult(_libraryRepository.GetAuthors(authorsResourceParameters));
+			string previousPageLink = authorsFromRepo.HasPrevious ? CreateAuthorsResourceUri(authorsResourceParameters, ResourceUriType.PreviousPage) : null;
+			string nextPageLink = authorsFromRepo.HasNext ? CreateAuthorsResourceUri(authorsResourceParameters, ResourceUriType.NextPage) : null;
+			var paginationMetadata = new
+			{
+				totalCount = authorsFromRepo.TotalCount,
+				pageSize = authorsFromRepo.PageSize,
+				currentPage = authorsFromRepo.CurrentPage,
+				totalPages = authorsFromRepo.TotalPages,
+				previousPageLink,
+				nextPageLink
+			};
+			Response.Headers.Add("X-Pagination", Newtonsoft.Json.JsonConvert.SerializeObject(paginationMetadata));
 			IEnumerable<AuthorDto> authors = Mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo);
 			return Ok(authors);
 		}
@@ -72,5 +98,47 @@
 			}
 			return NoContent();
 		}
+
+		#endregion Public Actions
+
+		#region Private Funcationss
+
+		private string CreateAuthorsResourceUri(AuthorsResourceParameters authorsResourceParameters, ResourceUriType type)
+		{
+			switch (type)
+			{
+				case ResourceUriType.PreviousPage:
+					return _urlHelper.Link("GetAuthors",
+						new
+						{
+							searchQuery = authorsResourceParameters.SearchQuery,
+							genre = authorsResourceParameters.Genre,
+							pageNumber = authorsResourceParameters.PageNumber - 1,
+							pageSize = authorsResourceParameters.PageSize
+						});
+
+				case ResourceUriType.NextPage:
+					return _urlHelper.Link("GetAuthors",
+						new
+						{
+							searchQuery = authorsResourceParameters.SearchQuery,
+							genre = authorsResourceParameters.Genre,
+							pageNumber = authorsResourceParameters.PageNumber + 1,
+							pageSize = authorsResourceParameters.PageSize
+						});
+
+				default:
+					return _urlHelper.Link("GetAuthors",
+					new
+					{
+						searchQuery = authorsResourceParameters.SearchQuery,
+						genre = authorsResourceParameters.Genre,
+						pageNumber = authorsResourceParameters.PageNumber,
+						pageSize = authorsResourceParameters.PageSize
+					});
+			}
+		}
+
+		#endregion Private Funcationss
 	}
 }
