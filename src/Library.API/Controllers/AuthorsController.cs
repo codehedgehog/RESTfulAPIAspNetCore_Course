@@ -43,8 +43,8 @@
 		public async Task<IActionResult> GetAuthors(AuthorsResourceParameters authorsResourceParameters)
 		{
 			// throw new Exception("Random exception for testing purpose");
-			if (!_propertyMappingService.ValidMappingExistsFor<AuthorDto, Author> (authorsResourceParameters.OrderBy)) { return BadRequest(); }
-			if (!_typeHelperService.TypeHasProperties<AuthorDto> (authorsResourceParameters.Fields)) { return BadRequest(); }
+			if (!_propertyMappingService.ValidMappingExistsFor<AuthorDto, Author>(authorsResourceParameters.OrderBy)) { return BadRequest(); }
+			if (!_typeHelperService.TypeHasProperties<AuthorDto>(authorsResourceParameters.Fields)) { return BadRequest(); }
 			PagedList<Author> authorsFromRepo = await Task.FromResult(_libraryRepository.GetAuthors(authorsResourceParameters));
 			string previousPageLink = authorsFromRepo.HasPrevious ? CreateAuthorsResourceUri(authorsResourceParameters, ResourceUriType.PreviousPage) : null;
 			string nextPageLink = authorsFromRepo.HasNext ? CreateAuthorsResourceUri(authorsResourceParameters, ResourceUriType.NextPage) : null;
