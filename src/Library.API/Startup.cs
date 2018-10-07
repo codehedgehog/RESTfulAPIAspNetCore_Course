@@ -14,6 +14,7 @@
 	using Microsoft.EntityFrameworkCore;
 	using Microsoft.Extensions.Configuration;
 	using Microsoft.Extensions.DependencyInjection;
+	using Newtonsoft.Json.Serialization;
 	using Serilog;
 
 	public class Startup
@@ -33,7 +34,9 @@
 				options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
 				options.InputFormatters.Add(new XmlDataContractSerializerInputFormatter(options));
 			})
-			.SetCompatibilityVersion(version: CompatibilityVersion.Version_2_1);
+			.SetCompatibilityVersion(version: CompatibilityVersion.Version_2_1)
+			.AddJsonOptions(options => { options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver(); });
+
 			services.AddDbContext<LibraryContext>(o => o.UseSqlServer(Configuration.GetConnectionString("libraryDbContext")), contextLifetime: ServiceLifetime.Scoped, optionsLifetime: ServiceLifetime.Scoped);
 			services.AddScoped<ILibraryRepository, LibraryRepository>();
 
@@ -44,6 +47,9 @@
 				ActionContext actionContext = implementationFactory.GetService<IActionContextAccessor>().ActionContext;
 				return new UrlHelper(actionContext);
 			});
+
+			services.AddTransient<IPropertyMappingService, PropertyMappingService>();
+			services.AddTransient<ITypeHelperService, TypeHelperService>();
 		}
 
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env, LibraryContext libraryContext)
