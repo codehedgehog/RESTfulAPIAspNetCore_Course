@@ -18,6 +18,8 @@
 	using Newtonsoft.Json.Serialization;
 	using Serilog;
 
+
+
 	public class Startup
 	{
 		public Startup(IConfiguration configuration)
@@ -51,6 +53,12 @@
 
 			services.AddTransient<IPropertyMappingService, PropertyMappingService>();
 			services.AddTransient<ITypeHelperService, TypeHelperService>();
+
+			services.AddHttpCacheHeaders(
+				(expirationModelOptions) => { expirationModelOptions.MaxAge = 600; },
+				(validationModelOptions) => { validationModelOptions.MustRevalidate = true;}
+			);
+			services.AddResponseCaching();  // Shared caches for .NET Core
 
 			services.AddMemoryCache();
 			services.Configure<IpRateLimitOptions>((options) =>
@@ -118,6 +126,8 @@
 				cfg.CreateMap<Entities.Book, Models.BookForUpdateDto>();
 			});
 			libraryContext.EnsureSeedDataForContext();
+			app.UseResponseCaching();
+			app.UseHttpCacheHeaders();
 			app.UseIpRateLimiting();
 			app.UseMvc();
 		}

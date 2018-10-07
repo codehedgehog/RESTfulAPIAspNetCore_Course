@@ -21,6 +21,8 @@
   <ItemGroup>
     <None Remove="Library.API-20180916.txt" />
     <None Remove="Library.API-20180930.log--txt" />
+    <None Remove="Library.API-20181006.log--txt" />
+    <None Remove="Library.API-20181007.log--txt" />
     <None Remove="Readme.md" />
   </ItemGroup>
 
@@ -31,6 +33,7 @@
   <ItemGroup>
     <PackageReference Include="AspNetCoreRateLimit" Version="2.1.0" />
     <PackageReference Include="AutoMapper" Version="7.0.1" />
+    <PackageReference Include="Marvin.Cache.Headers" Version="3.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Serilog.AspNetCore" Version="2.1.1" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="2.6.1" />
