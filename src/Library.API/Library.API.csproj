@@ -21,6 +21,7 @@
   <ItemGroup>
     <None Remove="Library.API-20180916.txt" />
     <None Remove="Library.API-20180930.log--txt" />
+    <None Remove="Readme.md" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,6 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AspNetCoreRateLimit" Version="2.1.0" />
     <PackageReference Include="AutoMapper" Version="7.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Serilog.AspNetCore" Version="2.1.1" />
