@@ -40,6 +40,7 @@
 		#region Public Actions
 
 		[HttpGet(Name = "GetAuthors")]
+		[HttpHead]
 		public async Task<IActionResult> GetAuthors(AuthorsResourceParameters authorsResourceParameters)
 		{
 			// throw new Exception("Random exception for testing purpose");
@@ -105,6 +106,13 @@
 				throw new Exception($"Deleting author {id} failed on save.");
 			}
 			return NoContent();
+		}
+
+		[HttpOptions]
+		public IActionResult GetAuthorsOptions()
+		{
+			Response.Headers.Add("Allow", "GET,OPTIONS,POST");
+			return Ok();
 		}
 
 		#endregion Public Actions

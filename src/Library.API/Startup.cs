@@ -1,5 +1,6 @@
 ﻿namespace Library.API
 {
+	using AspNetCoreRateLimit;
 	using Library.API.DbContexts;
 	using Library.API.Helpers;
 	using Library.API.Services;
@@ -50,6 +51,28 @@
 
 			services.AddTransient<IPropertyMappingService, PropertyMappingService>();
 			services.AddTransient<ITypeHelperService, TypeHelperService>();
+
+			services.AddMemoryCache();
+			services.Configure<IpRateLimitOptions>((options) =>
+			{
+				options.GeneralRules = new System.Collections.Generic.List<RateLimitRule>()
+				{
+						//new RateLimitRule()
+						//{
+						//		Endpoint = "*",
+						//		Limit = 3,
+						//		Period = "5m"
+						//},
+						new RateLimitRule()
+						{
+								Endpoint = "*",
+								Limit = 2,
+								Period = "10s"
+						}
+				};
+			});
+			services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+			services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
 		}
 
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env, LibraryContext libraryContext)
@@ -95,6 +118,7 @@
 				cfg.CreateMap<Entities.Book, Models.BookForUpdateDto>();
 			});
 			libraryContext.EnsureSeedDataForContext();
+			app.UseIpRateLimiting();
 			app.UseMvc();
 		}
 	}
