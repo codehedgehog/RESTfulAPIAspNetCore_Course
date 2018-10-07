@@ -18,16 +18,21 @@
 
 		private ILibraryRepository _libraryRepository;
 		private IUrlHelper _urlHelper;
+		private IPropertyMappingService _propertyMappingService;
+		private ITypeHelperService _typeHelperService;
+
 		private const int maxAuthorPageSize = 20;
 
 		#endregion Private Fields
 
 		#region Constructors
 
-		public AuthorsController(ILibraryRepository libraryRepository, IUrlHelper urlHelper)
+		public AuthorsController(ILibraryRepository libraryRepository, IUrlHelper urlHelper, IPropertyMappingService propertyMappingService, ITypeHelperService typeHelperService)
 		{
 			_libraryRepository = libraryRepository;
 			_urlHelper = urlHelper;
+			_propertyMappingService = propertyMappingService;
+			_typeHelperService = typeHelperService;
 		}
 
 		#endregion Constructors
@@ -38,6 +43,8 @@
 		public async Task<IActionResult> GetAuthors(AuthorsResourceParameters authorsResourceParameters)
 		{
 			// throw new Exception("Random exception for testing purpose");
+			if (!_propertyMappingService.ValidMappingExistsFor<AuthorDto, Author>(authorsResourceParameters.OrderBy)) { return BadRequest(); }
+			if (!_typeHelperService.TypeHasProperties<AuthorDto>(authorsResourceParameters.Fields)) { return BadRequest(); }
 			PagedList<Author> authorsFromRepo = await Task.FromResult(_libraryRepository.GetAuthors(authorsResourceParameters));
 			string previousPageLink = authorsFromRepo.HasPrevious ? CreateAuthorsResourceUri(authorsResourceParameters, ResourceUriType.PreviousPage) : null;
 			string nextPageLink = authorsFromRepo.HasNext ? CreateAuthorsResourceUri(authorsResourceParameters, ResourceUriType.NextPage) : null;
@@ -52,16 +59,17 @@
 			};
 			Response.Headers.Add("X-Pagination", Newtonsoft.Json.JsonConvert.SerializeObject(paginationMetadata));
 			IEnumerable<AuthorDto> authors = Mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo);
-			return Ok(authors);
+			return Ok(authors.ShapeData(authorsResourceParameters.Fields));
 		}
 
 		[HttpGet(template: "{id}", Name = "GetAuthor")]
-		public async Task<IActionResult> GetAuthor(Guid id)
+		public async Task<IActionResult> GetAuthor(Guid id, [FromQuery] string fields)
 		{
+			if (!_typeHelperService.TypeHasProperties<AuthorDto>(fields)) { return BadRequest(); }
 			Author authorFromRepo = await Task.FromResult(_libraryRepository.GetAuthor(id));
 			if (authorFromRepo == null) { return NotFound(); }
 			AuthorDto author = Mapper.Map<AuthorDto>(authorFromRepo);
-			return Ok(author);
+			return Ok(author.ShapeData(fields));
 		}
 
 		[HttpPost]
@@ -111,6 +119,8 @@
 					return _urlHelper.Link("GetAuthors",
 						new
 						{
+							fields = authorsResourceParameters.Fields,
+							orderBy = authorsResourceParameters.OrderBy,
 							searchQuery = authorsResourceParameters.SearchQuery,
 							genre = authorsResourceParameters.Genre,
 							pageNumber = authorsResourceParameters.PageNumber - 1,
@@ -121,6 +131,8 @@
 					return _urlHelper.Link("GetAuthors",
 						new
 						{
+							fields = authorsResourceParameters.Fields,
+							orderBy = authorsResourceParameters.OrderBy,
 							searchQuery = authorsResourceParameters.SearchQuery,
 							genre = authorsResourceParameters.Genre,
 							pageNumber = authorsResourceParameters.PageNumber + 1,
@@ -131,6 +143,8 @@
 					return _urlHelper.Link("GetAuthors",
 					new
 					{
+						fields = authorsResourceParameters.Fields,
+						orderBy = authorsResourceParameters.OrderBy,
 						searchQuery = authorsResourceParameters.SearchQuery,
 						genre = authorsResourceParameters.Genre,
 						pageNumber = authorsResourceParameters.PageNumber,
